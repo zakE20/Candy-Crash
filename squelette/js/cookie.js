@@ -119,14 +119,5 @@ export default class Cookie {
     console.log("Distance = " + distance);
     return distance;
   }
-  static distance(cookie1, cookie2) {
-    let l1 = cookie1.ligne;
-    let c1 = cookie1.colonne;
-    let l2 = cookie2.ligne;
-    let c2 = cookie2.colonne;
-
-    const distance = Math.sqrt((c2 - c1) * (c2 - c1) + (l2 - l1) * (l2 - l1));
-    console.log("Distance = " + distance);
-    return distance;
-  }
+  
 }
