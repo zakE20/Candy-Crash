@@ -1,7 +1,7 @@
 import Cookie from "./cookie.js";
 import { create2DArray } from "./utils.js";
 
-// Classe représentant la grille du jeu
+
 export default class Grille {
   cookieSelectionnes = []; // Tableau pour stocker les cookies sélectionnés
 
@@ -10,6 +10,7 @@ export default class Grille {
     this.c = c; // Nombre de colonnes
     this.l = l; // Nombre de lignes
     this.score = 0; // Score du joueur
+    this.moves = 20; // Initialiser le nombre de mouvements
     this.tabcookies = this.remplirTableauDeCookies(6); // Remplir la grille avec des cookies
   }
 
@@ -37,47 +38,48 @@ export default class Grille {
   // Gérer le clic sur un cookie
   handleCookieClick(ligne, colonne) {
     let cookie = this.tabcookies[ligne][colonne];
-
+  
+    // Si le cookie est déjà sélectionné, on le désélectionne et on réinitialise le tableau de sélection.
     if (cookie.isSelectionnee()) {
-        cookie.deselectionnee(); // Désélectionner le cookie
-        this.cookieSelectionnes = [];
-        return;
+      cookie.deselectionnee();
+      this.cookieSelectionnes = [];
+      return;
     }
-
-    cookie.selectionnee(); // Sélectionner le cookie
+    
+    cookie.selectionnee();
     this.cookieSelectionnes.push(cookie);
-
+  
     if (this.cookieSelectionnes.length === 2) {
-        let cookie1 = this.cookieSelectionnes[0];
-        let cookie2 = this.cookieSelectionnes[1];
-
-        console.log(`🔄 Tentative de swap entre (${cookie1.ligne},${cookie1.colonne}) et (${cookie2.ligne},${cookie2.colonne})`);
-
-        Cookie.swapCookies(cookie1, cookie2); //swap les cookies
-
-        // Mettre à jour les coordonnées des cookies après le swap
-        [cookie1.ligne, cookie1.colonne, cookie2.ligne, cookie2.colonne] = [cookie2.ligne, cookie2.colonne, cookie1.ligne, cookie1.colonne];
-
-        console.log("Vérification des alignements après swap");
-        setTimeout(() => {
-            let cookiesAEliminer = this.detecterAlignements(); // Détecter les alignements
-
-            if (cookiesAEliminer.length > 0) {
-                console.log("Alignements détectés, suppression en cours");
-                this.eliminerAlignements(); // Éliminer les alignements
-            } else {
-                console.log("Aucun alignement détecté, annulation du swap.");
-                Cookie.swapCookies(cookie1, cookie2); // Annuler l'échange si aucun alignement
-
-                // Remettre à jour les coordonnées des cookies après l'annulation du swap
-                [cookie1.ligne, cookie1.colonne, cookie2.ligne, cookie2.colonne] = [cookie2.ligne, cookie2.colonne, cookie1.ligne, cookie1.colonne];
-            }
-
-            this.cookieSelectionnes = [];
-        }, 100); // Ajout d'un délai pour permettre à l'interface utilisateur de se mettre à jour
+      let cookie1 = this.cookieSelectionnes[0];
+      let cookie2 = this.cookieSelectionnes[1];
+  
+      console.log(`Tentative de swap entre (${cookie1.ligne},${cookie1.colonne}) et (${cookie2.ligne},${cookie2.colonne})`);
+  
+      // Décrémentation du compteur de mouvements dès la tentative
+      this.moves--;
+      document.getElementById("mouvements").textContent = "Moves: " + this.moves;
+  
+      // On effectue le swap des cookies
+      Cookie.swapCookies(cookie1, cookie2);
+  
+      setTimeout(() => {
+        let cookiesAEliminer = this.detecterAlignements();
+  
+        if (cookiesAEliminer.length > 0) {
+          // Si des alignements sont détectés, on les élimine
+          this.eliminerAlignements();
+        } else {
+          console.log("Aucun alignement détecté, retour en arrière.");
+          // Annulation du swap si aucun alignement n'est détecté
+          Cookie.swapCookies(cookie1, cookie2);
+        }
+        this.cookieSelectionnes = [];
+        // Vérifie les conditions du niveau via le LevelManager
+        levelManager.verifierEtChangerNiveau();
+      }, 100);
     }
-}
-
+  }
+  
   //remplir la grille avec des cookies aléatoires
   remplirTableauDeCookies(nbDeCookiesDifferents) {
     let tab = create2DArray(this.l);
@@ -93,12 +95,12 @@ export default class Grille {
     return tab;
 }
 
-updateScore(points) {
-  this.score += points; // Utiliser this.score
-  // Mettre à jour le score dans le HTML
+  updateScore(points) {
+    this.score += points;
+    // Mettre à jour le score dans le HTML
   const scoreDiv = document.getElementById('score');
-  if (scoreDiv) {
-    scoreDiv.textContent = "Score : " + this.score; // Utiliser this.score
+  if(scoreDiv){
+    scoreDiv.textContent = "Score : " + this.score;
   }
 }
   //detecter les alignements de cookies

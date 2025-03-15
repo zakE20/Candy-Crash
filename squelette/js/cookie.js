@@ -119,5 +119,5 @@ export default class Cookie {
     console.log("Distance = " + distance);
     return distance;
   }
-  
+ 
 }

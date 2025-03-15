@@ -1,7 +1,3 @@
-body{
-    background: url("../assets/images/background.jpg") no-repeat center center fixed;
-    background-size: cover;
-}
 #main {
     background-image: url("../assets/images/Background@2x.png");
     border: 4px solid rgba(100, 100, 100);
@@ -21,7 +17,7 @@ body{
 }
 
 #grille {
-    width: 500px;
+    width: 800px;
     height: 720px;
     background-color: rgba(100, 100, 100, 0.5);
     border: 1px;
@@ -64,4 +60,8 @@ body{
 .cookies-selected {
     transform: scale(1.2, 1.2);
     filter: drop-shadow(4px 4px 4px #222);
+}
+
+.eliminationCandidate{
+    box-shadow: 0 0 20px 10px red;
 }
