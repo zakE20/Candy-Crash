@@ -12,7 +12,6 @@ export default class LevelManager {
   }
 
   updateInterfaceNiveau() {
-    // Ici, on suppose que le 3e div de #infos affiche le niveau.
     const niveauDiv = document.querySelector("#infos div:nth-child(3)");
     if (niveauDiv) {
       niveauDiv.textContent = `Niveau : ${this.niveauActuel + 1}`;
@@ -30,7 +29,7 @@ export default class LevelManager {
       alert(`Niveau ${currentLevel.numero} réussi !`);
       this.niveauActuel++;
       if (this.niveauActuel < this.levels.length) {
-        // Réinitialiser les mouvements pour le niveau suivant s'il y a une limite définie
+        //reinitialiser les mouvements pour le niveau suivant s'il y a une limite définie
         if (this.levels[this.niveauActuel].mouvementsMax) {
           this.grille.moves = this.levels[this.niveauActuel].mouvementsMax;
           document.getElementById("mouvements").textContent = "Moves: " + this.grille.moves;
@@ -41,7 +40,6 @@ export default class LevelManager {
       }
     } else if (gameState.moves <= 0) {
       alert(`Mouvements épuisés pour le niveau ${currentLevel.numero}.`);
-      // Optionnel : redémarrer le niveau ou proposer un redémarrage.
     }
   }
 }

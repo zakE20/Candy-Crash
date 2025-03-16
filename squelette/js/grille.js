@@ -4,14 +4,22 @@ import { create2DArray } from "./utils.js";
 // Classe représentant la grille du jeu
 export default class Grille {
   cookieSelectionnes = []; // Tableau pour stocker les cookies sélectionnés
+  /**
+   * @param {number} l - Nombre de lignes
+   * @param {number} c - Nombre de colonnes
+   * @param {LevelManager} levelManager - Instance du gestionnaire de niveaux
+   */
 
   // Constructeur de la grille
-  constructor(l, c) {
+  constructor(l, c, levelManager) {
     this.c = c; // Nombre de colonnes
     this.l = l; // Nombre de lignes
+    this.moves=20;//mouvements initial
     this.score = 0; // Score du joueur
     this.tabcookies = this.remplirTableauDeCookies(6); // Remplir la grille avec des cookies
+    this.levelManager = levelManager;
   }
+
 
   // Afficher les cookies dans la grille
   showCookies() {
@@ -20,7 +28,7 @@ export default class Grille {
 
     for (let l = 0; l < this.l; l++) {
       for (let c = 0; c < this.c; c++) {
-        let cookie = this.tabcookies[l][c];
+        const cookie = this.tabcookies[l][c];
 
         if (!cookie) continue; // Ignorer les cases vides
 
@@ -52,11 +60,15 @@ export default class Grille {
         let cookie2 = this.cookieSelectionnes[1];
 
         console.log(`🔄 Tentative de swap entre (${cookie1.ligne},${cookie1.colonne}) et (${cookie2.ligne},${cookie2.colonne})`);
+        // Décrémenter le compteur de mouvements 
+      this.moves--;
+      //mettre à jour dans le HTML
+      document.getElementById("mouvements").textContent = "Moves: " + this.moves;
+
 
         Cookie.swapCookies(cookie1, cookie2); //swap les cookies
 
-        // Mettre à jour les coordonnées des cookies après le swap
-        [cookie1.ligne, cookie1.colonne, cookie2.ligne, cookie2.colonne] = [cookie2.ligne, cookie2.colonne, cookie1.ligne, cookie1.colonne];
+        
 
         console.log("Vérification des alignements après swap");
         setTimeout(() => {
@@ -69,11 +81,12 @@ export default class Grille {
                 console.log("Aucun alignement détecté, annulation du swap.");
                 Cookie.swapCookies(cookie1, cookie2); // Annuler l'échange si aucun alignement
 
-                // Remettre à jour les coordonnées des cookies après l'annulation du swap
-                [cookie1.ligne, cookie1.colonne, cookie2.ligne, cookie2.colonne] = [cookie2.ligne, cookie2.colonne, cookie1.ligne, cookie1.colonne];
+                
             }
 
             this.cookieSelectionnes = [];
+            this.levelManager.verifierEtChangerNiveau();
+
         }, 100); // Ajout d'un délai pour permettre à l'interface utilisateur de se mettre à jour
     }
 }
@@ -94,11 +107,11 @@ export default class Grille {
 }
 
 updateScore(points) {
-  this.score += points; // Utiliser this.score
-  // Mettre à jour le score dans le HTML
+  this.score += points; 
+// Mettre à jour le score dans le HTML
   const scoreDiv = document.getElementById('score');
   if (scoreDiv) {
-    scoreDiv.textContent = "Score : " + this.score; // Utiliser this.score
+    scoreDiv.textContent = "Score : " + this.score; 
   }
 }
   //detecter les alignements de cookies
