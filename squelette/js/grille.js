@@ -4,22 +4,22 @@ import { create2DArray } from "./utils.js";
 // Classe représentant la grille du jeu
 export default class Grille {
   cookieSelectionnes = []; // Tableau pour stocker les cookies sélectionnés
+  
   /**
    * @param {number} l - Nombre de lignes
    * @param {number} c - Nombre de colonnes
    * @param {LevelManager} levelManager - Instance du gestionnaire de niveaux
    */
-
-  // Constructeur de la grille
   constructor(l, c, levelManager) {
     this.c = c; // Nombre de colonnes
     this.l = l; // Nombre de lignes
-    this.moves=20;//mouvements initial
+    this.moves = 20; // mouvements initial
     this.score = 0; // Score du joueur
     this.tabcookies = this.remplirTableauDeCookies(6); // Remplir la grille avec des cookies
     this.levelManager = levelManager;
+    // Ajout d'une propriété pour suivre le nombre de croissants collectés (on considère type === 0)
+    this.nbCroissant = 0;
   }
-
 
   // Afficher les cookies dans la grille
   showCookies() {
@@ -61,14 +61,11 @@ export default class Grille {
 
         console.log(`🔄 Tentative de swap entre (${cookie1.ligne},${cookie1.colonne}) et (${cookie2.ligne},${cookie2.colonne})`);
         // Décrémenter le compteur de mouvements 
-      this.moves--;
-      //mettre à jour dans le HTML
-      document.getElementById("mouvements").textContent = "Moves: " + this.moves;
+        this.moves--;
+        // Mettre à jour dans le HTML
+        document.getElementById("mouvements").textContent = "Moves: " + this.moves;
 
-
-        Cookie.swapCookies(cookie1, cookie2); //swap les cookies
-
-        
+        Cookie.swapCookies(cookie1, cookie2); // swap les cookies
 
         console.log("Vérification des alignements après swap");
         setTimeout(() => {
@@ -80,18 +77,15 @@ export default class Grille {
             } else {
                 console.log("Aucun alignement détecté, annulation du swap.");
                 Cookie.swapCookies(cookie1, cookie2); // Annuler l'échange si aucun alignement
-
-                
             }
 
             this.cookieSelectionnes = [];
             this.levelManager.verifierEtChangerNiveau();
-
-        }, 100); // Ajout d'un délai pour permettre à l'interface utilisateur de se mettre à jour
+        }, 100);
     }
-}
+  }
 
-  //remplir la grille avec des cookies aléatoires
+  // Remplir la grille avec des cookies aléatoires
   remplirTableauDeCookies(nbDeCookiesDifferents) {
     let tab = create2DArray(this.l);
 
@@ -104,17 +98,18 @@ export default class Grille {
     }
 
     return tab;
-}
-
-updateScore(points) {
-  this.score += points; 
-// Mettre à jour le score dans le HTML
-  const scoreDiv = document.getElementById('score');
-  if (scoreDiv) {
-    scoreDiv.textContent = "Score : " + this.score; 
   }
-}
-  //detecter les alignements de cookies
+
+  updateScore(points) {
+    this.score += points; 
+    //Mettre à jour le score dans le HTML
+    const scoreDiv = document.getElementById('score');
+    if(scoreDiv){
+      scoreDiv.textContent = "Score : " + this.score; 
+    }
+  }
+
+  // Détecter les alignements de cookies
   detecterAlignements() {
     let cookiesAEliminer = [];
 
@@ -154,7 +149,7 @@ updateScore(points) {
 
     console.log(`Total de cookies détectés à supprimer : ${cookiesAEliminer.length}`);
     return cookiesAEliminer;
-}
+  }
  
 
   // Éliminer les alignements de cookies
@@ -164,24 +159,40 @@ updateScore(points) {
     if (cookiesAEliminer.length > 0) {
       console.log("🗑 Suppression des cookies :", cookiesAEliminer.map(c => `(${c.ligne}, ${c.colonne})`));
       let points = 0;
-    if (cookiesAEliminer.length === 3) {
-      points = 60;
-    } else if (cookiesAEliminer.length === 4) {
-      points = 120;
-    } else if (cookiesAEliminer.length >= 5) {
-      points = 200;
-    }
-    this.updateScore(points);
+      if (cookiesAEliminer.length === 3) {
+        points = 60;
+      } else if (cookiesAEliminer.length === 4) {
+        points = 120;
+      } else if (cookiesAEliminer.length >= 5) {
+        points = 200;
+      }
+      this.updateScore(points);
+      
+      //on compte les cookies de type Croissant 
+      let nbCroissantEliminated = 0;
+      cookiesAEliminer.forEach(cookie => {
+        if (cookie.type === 0) {
+          nbCroissantEliminated++;
+        }
+      });
+      this.nbCroissant += nbCroissantEliminated;
+      console.log("Nombre de croissants collectés :", this.nbCroissant);
+      //update l'affichage du compteur de croissants
+      if(document.getElementById("croissant-counter")){
+        const croissantRestant = 10 - this.nbCroissant;
+        document.getElementById("croissant-counter").textContent = "Croissants restants : " + croissantRestant;
+      }
+      
       cookiesAEliminer.forEach(cookie => {
         let { ligne, colonne } = cookie;
-        this.tabcookies[ligne][colonne] = null; // Supprimer le cookie dans la grille
+        this.tabcookies[ligne][colonne] = null; //Supprimer le cookie dans la grille
       });
 
-      this.descendreCookies(); // Faire descendre les cookies
-      setTimeout(() => this.eliminerAlignements(), 500); // Répéter l'élimination apres un délai
+      this.descendreCookies(); //Faire descendre les cookies
+      setTimeout(() => this.eliminerAlignements(), 500); //Répéter l'élimination après un délai
     } else {
       console.log("Aucun cookie à supprimer.");
-      this.showCookies(); //afficher les cookies
+      this.showCookies(); // afficher les cookies
     }
   }
 
@@ -211,7 +222,8 @@ updateScore(points) {
     }
 
     this.showCookies(); // Afficher les cookies
-}
+  }
+
   // Éliminer les cookies dans la première colonne
   eliminerCookiesPremCol() {
     for (let l = 0; l < this.l - 2; l++) {
@@ -225,7 +237,7 @@ updateScore(points) {
         this.tabcookies[l + 2][0] = null;
       }
     }
-    this.descendreCookies(); //descendre les cookies
+    this.descendreCookies(); // Descendre les cookies
   }
   
 }
